@@ -4,7 +4,11 @@ import android.app.Application;
 
 import com.vincenttetau.weatherapp.networking.NetworkingManager;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 public class WeatherApplication extends Application {
+
+    private static final String DEFAULT_FONT_PATH = "fonts/Montserrat-Regular.ttf";
 
     private NetworkingManager networkingManager;
 
@@ -13,6 +17,11 @@ public class WeatherApplication extends Application {
         super.onCreate();
 
         this.networkingManager = new NetworkingManager(this);
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath(DEFAULT_FONT_PATH)
+                .setFontAttrId(R.attr.fontPath)
+                .build());
     }
 
     public NetworkingManager getNetworkingManager() {

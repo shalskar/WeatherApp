@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+
+    <string name="north">N</string>
+    <string name="northeast">NE</string>
+    <string name="east">E</string>
+    <string name="southeast">SE</string>
+    <string name="south">S</string>
+    <string name="southwest">SW</string>
+    <string name="west">W</string>
+    <string name="northwest">NW</string>
+
 </resources>

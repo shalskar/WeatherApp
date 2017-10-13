@@ -3,7 +3,12 @@ package com.vincenttetau.weatherapp.networking;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.vincenttetau.weatherapp.UnixTimeAdapter;
+
 import java.io.IOException;
+import java.util.Date;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -18,7 +23,10 @@ public class NetworkingManager {
 
     private static final String BASE_WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/";
 
-    private static final String API_KEY = "58ee8f0848f80e1ad674e77542ab9ea6";
+    private static final String API_KEY_VALUE = "58ee8f0848f80e1ad674e77542ab9ea6";
+    private static final String API_KEY_KEY = "APPID";
+    private static final String UNIT_KEY = "units";
+    private static final String UNIT_VALUE = "metric";
 
     private Context context;
 
@@ -36,11 +44,18 @@ public class NetworkingManager {
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_WEATHER_API_URL)
                 .client(createHttpClient())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(createCustomGson()))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
 
         weatherApi = retrofit.create(WeatherApi.class);
+    }
+
+    @NonNull
+    private Gson createCustomGson() {
+        return new GsonBuilder()
+                .registerTypeAdapter(Date.class, new UnixTimeAdapter())
+                .create();
     }
 
     @NonNull
@@ -53,7 +68,8 @@ public class NetworkingManager {
                 HttpUrl originalHttpUrl = original.url();
 
                 HttpUrl url = originalHttpUrl.newBuilder()
-                        .addQueryParameter("APPID", API_KEY)
+                        .addQueryParameter(API_KEY_KEY, API_KEY_VALUE)
+                        .addQueryParameter(UNIT_KEY, UNIT_VALUE)
                         .build();
 
                 Request.Builder requestBuilder = original.newBuilder().url(url);

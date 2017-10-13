@@ -12,7 +12,7 @@ public interface WeatherApi {
     @GET("weather")
     Observable<CurrentWeatherResponse> getCurrentWeather(@Query("q") String city);
 
-    @GET("weather")
+    @GET("forecast")
     Observable<ForecastResponse> getForecast(@Query("q") String city);
 
 }

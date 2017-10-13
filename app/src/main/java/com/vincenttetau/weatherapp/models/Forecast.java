@@ -3,22 +3,26 @@ package com.vincenttetau.weatherapp.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
+import java.util.List;
 
 public class Forecast {
 
     @SerializedName("dt")
     private Date date;
 
-    private Main main;
+    @SerializedName("main")
+    private TemperatureInfo temperatureInfo;
 
-    private Weather weather;
+    @SerializedName("weather")
+    private List<Weather> weatherList;
 
+    @SerializedName("wind")
     private WindInfo windInfo;
 
-    public Forecast(Date date, Main main, Weather weather, WindInfo windInfo) {
+    public Forecast(Date date, TemperatureInfo temperatureInfo, List<Weather> weatherList, WindInfo windInfo) {
         this.date = date;
-        this.main = main;
-        this.weather = weather;
+        this.temperatureInfo = temperatureInfo;
+        this.weatherList = weatherList;
         this.windInfo = windInfo;
     }
 
@@ -30,20 +34,20 @@ public class Forecast {
         this.date = date;
     }
 
-    public Main getMain() {
-        return main;
+    public TemperatureInfo getTemperatureInfo() {
+        return temperatureInfo;
     }
 
-    public void setMain(Main main) {
-        this.main = main;
+    public void setTemperatureInfo(TemperatureInfo temperatureInfo) {
+        this.temperatureInfo = temperatureInfo;
     }
 
-    public Weather getWeather() {
-        return weather;
+    public List<Weather> getWeatherList() {
+        return weatherList;
     }
 
-    public void setWeather(Weather weather) {
-        this.weather = weather;
+    public void setWeatherList(List<Weather> weatherList) {
+        this.weatherList = weatherList;
     }
 
     public WindInfo getWindInfo() {

@@ -2,8 +2,7 @@ package com.vincenttetau.weatherapp.models;
 
 import com.google.gson.annotations.SerializedName;
 
-// Todo find more fitting name
-public class Main {
+public class TemperatureInfo {
 
     @SerializedName("temp")
     private float temperature;
@@ -14,10 +13,13 @@ public class Main {
     @SerializedName("temp_max")
     private float maxTemperature;
 
-    public Main(float temperature, float minTemperature, float maxTemperature) {
+    private float humidity;
+
+    public TemperatureInfo(float temperature, float minTemperature, float maxTemperature, float humidity) {
         this.temperature = temperature;
         this.minTemperature = minTemperature;
         this.maxTemperature = maxTemperature;
+        this.humidity = humidity;
     }
 
     public float getTemperature() {
@@ -42,5 +44,13 @@ public class Main {
 
     public void setMaxTemperature(float maxTemperature) {
         this.maxTemperature = maxTemperature;
+    }
+
+    public float getHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(float humidity) {
+        this.humidity = humidity;
     }
 }

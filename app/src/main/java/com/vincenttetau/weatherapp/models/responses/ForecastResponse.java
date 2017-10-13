@@ -19,4 +19,19 @@ public class ForecastResponse extends BaseResponse {
         super(code, message);
     }
 
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public List<Forecast> getForecasts() {
+        return forecasts;
+    }
+
+    public void setForecasts(List<Forecast> forecasts) {
+        this.forecasts = forecasts;
+    }
 }
