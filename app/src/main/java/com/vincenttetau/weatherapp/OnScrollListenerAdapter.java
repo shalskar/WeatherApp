@@ -3,24 +3,29 @@ package com.vincenttetau.weatherapp;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
-// todo rename
-public abstract class OnScrollStopListener extends RecyclerView.OnScrollListener {
+public abstract class OnScrollListenerAdapter extends RecyclerView.OnScrollListener {
 
     private LinearLayoutManager linearLayoutManager;
 
-    private boolean active;
+    private boolean active = true;
 
-    public OnScrollStopListener(@NonNull LinearLayoutManager linearLayoutManager) {
+    private int lastCentrePosition = -1;
+
+    public OnScrollListenerAdapter(@NonNull LinearLayoutManager linearLayoutManager) {
         this.linearLayoutManager = linearLayoutManager;
     }
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
-        if (active)
-            onScrollStopped(findCentreMostPosition());
+        if (active) {
+            int centreMostPosition = findCentreMostPosition();
+            if (centreMostPosition != lastCentrePosition) {
+                lastCentrePosition = centreMostPosition;
+                onScrolled(findCentreMostPosition());
+            }
+        }
     }
 
     private int findCentreMostPosition() {
@@ -30,13 +35,9 @@ public abstract class OnScrollStopListener extends RecyclerView.OnScrollListener
         return Math.max(firstPosition + (diff / 2), 0);
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
     public void setActive(boolean active) {
         this.active = active;
     }
 
-    public abstract void onScrollStopped(int centreMostPosition);
+    public abstract void onScrolled(int centreMostPosition);
 }

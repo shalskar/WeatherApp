@@ -4,21 +4,25 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by RachelTeTau on 11/10/17.
- */
-
 public class BaseResponse {
+
+    // todo possibly don't need to check error codes
+    private static final String SUCCESSFUL = "200";
 
     @SerializedName("cod")
     @NonNull
     private String code;
 
-    private float message;
+    @NonNull
+    private String message;
 
-    public BaseResponse(@NonNull String code, float message) {
+    public BaseResponse(@NonNull String code, @NonNull String message) {
         this.code = code;
         this.message = message;
+    }
+
+    public boolean isSuccessful() {
+        return code.equals(SUCCESSFUL);
     }
 
     @NonNull
@@ -30,11 +34,12 @@ public class BaseResponse {
         this.code = code;
     }
 
-    public float getMessage() {
+    @NonNull
+    public String getMessage() {
         return message;
     }
 
-    public void setMessage(float message) {
+    public void setMessage(@NonNull String message) {
         this.message = message;
     }
 }

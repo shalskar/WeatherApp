@@ -1,19 +1,19 @@
 package com.vincenttetau.weatherapp.presenters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import com.vincenttetau.weatherapp.TimeUtil;
+import com.vincenttetau.weatherapp.R;
+import com.vincenttetau.weatherapp.utils.TimeUtil;
 import com.vincenttetau.weatherapp.models.Forecast;
-import com.vincenttetau.weatherapp.models.TemperatureInfo;
 import com.vincenttetau.weatherapp.models.Weather;
-import com.vincenttetau.weatherapp.models.WindInfo;
 import com.vincenttetau.weatherapp.models.responses.CurrentWeatherResponse;
 import com.vincenttetau.weatherapp.models.responses.ForecastResponse;
 import com.vincenttetau.weatherapp.networking.NetworkingManager;
+import com.vincenttetau.weatherapp.views.WeatherView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observer;
@@ -21,118 +21,160 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class WeatherPresenter {
-
-    private WeatherView weatherView;
+public class WeatherPresenter extends BasePresenter<WeatherView> {
 
     private NetworkingManager networkingManager;
 
-    private List<Forecast> weatherData;
+    private Disposable weatherDisposable;
+
+    private List<Forecast> forecasts;
+
+    @Nullable
+    private String currentError;
 
     public WeatherPresenter(NetworkingManager networkingManager) {
         this.networkingManager = networkingManager;
-        this.weatherData = new ArrayList<>();
+        this.forecasts = new ArrayList<>();
     }
 
     public void bindView(@NonNull WeatherView weatherView) {
-        this.weatherView = weatherView;
-        loadWeather();
+        super.bindView(weatherView);
+        // todo automatically load from users gps
+        restoreState();
     }
 
-    private void loadWeather() {
+    private void restoreState() {
+        if (weatherDisposable != null) {
+            getView().hideWeatherView();
+            getView().setLoading(true);
+        } else if (!forecasts.isEmpty()) {
+            getView().showWeatherView();
+            getView().setLoading(false);
+            getView().updateList();
+        }
+        getView().setError(currentError);
+    }
+
+    public void loadWeather(@NonNull final String cityId) {
+        getView().hideWeatherView();
+        getView().setLoading(true);
+        currentError = null;
+        getView().setError(currentError);
+
+        if (weatherDisposable != null) {
+            weatherDisposable.dispose();
+            weatherDisposable = null;
+        }
+
+        forecasts.clear();
+
         networkingManager.getWeatherApi()
-                .getCurrentWeather("Wellington")
+                .getCurrentWeather(cityId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<CurrentWeatherResponse>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
-
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable disposable) {
+                        weatherDisposable = disposable;
                     }
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull CurrentWeatherResponse currentWeatherResponse) {
-                        weatherData.add(currentWeatherResponse);
-                        loadForecast();
+                        handleWeatherLoadedSuccess(currentWeatherResponse, cityId);
                     }
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
+                        getView().setError(R.string.generic_error_message);
+                        getView().setLoading(false);
+                        weatherDisposable = null;
                     }
 
                     @Override
                     public void onComplete() {
-
+                        weatherDisposable = null;
                     }
                 });
     }
 
-    private void loadForecast() {
+    private void handleWeatherLoadedSuccess(@NonNull CurrentWeatherResponse currentWeatherResponse, @NonNull String cityId) {
+        forecasts.add(currentWeatherResponse);
+        loadForecast(cityId);
+    }
+
+    private void loadForecast(@NonNull String cityId) {
         networkingManager.getWeatherApi()
-                .getForecast("Wellington")
+                .getForecast(cityId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ForecastResponse>() {
                     @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
-
+                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable disposable) {
+                        weatherDisposable = disposable;
                     }
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull ForecastResponse forecastResponse) {
-                        weatherData.addAll(forecastResponse.getForecasts());
-                        weatherView.updateList();
-                        onPositionChanged(0);
+                        handleForecastLoadedSuccess(forecastResponse);
                     }
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
+                        // todo make errors persist on rotation
+                        getView().setError(R.string.generic_error_message);
+                        getView().setLoading(false);
+                        weatherDisposable = null;
                     }
 
                     @Override
                     public void onComplete() {
-
+                        weatherDisposable = null;
                     }
                 });
     }
 
+    private void handleForecastLoadedSuccess(@NonNull ForecastResponse forecastResponse) {
+        if (forecastResponse.isSuccessful()) {
+            getView().showWeatherView();
+            forecasts.addAll(forecastResponse.getForecasts());
+            getView().updateList();
+            onPositionChanged(0);
+            currentError = null;
+        } else {
+            getView().hideWeatherView();
+            currentError = forecastResponse.getMessage();
+        }
+        getView().setError(currentError);
+        getView().setLoading(false);
+    }
+
     public void onPositionChanged(int position) {
-        Forecast forecast = weatherData.get(position);
-        weatherView.setTemperature(forecast.getTemperatureInfo());
-        weatherView.setWindDirection(forecast.getWindInfo());
-        weatherView.setDate(TimeUtil.formatDate(forecast.getDate()));
-        weatherView.setTime(TimeUtil.formatTime(forecast.getDate()));
+        if (!forecasts.isEmpty()) {
+            Forecast forecast = forecasts.get(position);
+            getView().setTemperature(forecast.getTemperatureInfo());
+            getView().setWindDirection(forecast.getWindInfo());
+            getView().setDate(TimeUtil.formatDate(forecast.getDate()));
+            getView().setTime(TimeUtil.formatTime(forecast.getDate()));
 
-        // todo move to util
-        Weather weather = forecast.getWeatherList().get(0);
-        String weatherCondition = weather.getDescription();
-        weatherCondition = weatherCondition.substring(0, 1).toUpperCase() + weatherCondition.substring(1);
-        weatherView.setWeatherCondition(weatherCondition);
+            // todo move to util
+            Weather weather = forecast.getWeatherList().get(0);
+            String weatherCondition = weather.getDescription();
+            weatherCondition = weatherCondition.substring(0, 1).toUpperCase() + weatherCondition.substring(1);
+
+            getView().setWeatherCondition(weatherCondition);
+
+            getView().updateBackground(getHourOfDay(forecast));
+        }
     }
 
-    public void unbindView() {
-        this.weatherView = null;
+    private int getHourOfDay(@NonNull Forecast forecast) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(forecast.getDate());
+        return calendar.get(Calendar.HOUR_OF_DAY);
     }
 
-    public List<Forecast> getWeatherData() {
-        return weatherData;
+    public List<Forecast> getForecasts() {
+        return forecasts;
     }
 
-    public interface WeatherView {
-
-        void setTemperature(@NonNull TemperatureInfo temperatureInfo);
-
-        void setWindDirection(@NonNull WindInfo windInfo);
-
-        void setWeatherCondition(@NonNull String weatherCondition);
-
-        void setDate(@NonNull String date);
-
-        void setTime(@NonNull String time);
-
-        void updateList();
-
-    }
 }

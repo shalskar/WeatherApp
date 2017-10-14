@@ -15,7 +15,7 @@ public class ForecastResponse extends BaseResponse {
     @SerializedName("list")
     private List<Forecast> forecasts;
 
-    public ForecastResponse(@NonNull String code, float message) {
+    public ForecastResponse(@NonNull String code, @NonNull String message) {
         super(code, message);
     }
 

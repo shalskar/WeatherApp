@@ -1,9 +1,13 @@
-package com.vincenttetau.weatherapp;
+package com.vincenttetau.weatherapp.utils;
 
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
 
+import com.vincenttetau.weatherapp.R;
+
 public class WeatherUtil {
+
+    public static final String NO_FLOATING_POINT_NUMBER_FORMAT = "%0.f";
 
     @StringRes
     public static int getWindDirectionStringResource(float windDirection) {

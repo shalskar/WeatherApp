@@ -1,4 +1,4 @@
-package com.vincenttetau.weatherapp;
+package com.vincenttetau.weatherapp.utils;
 
 import android.support.annotation.NonNull;
 

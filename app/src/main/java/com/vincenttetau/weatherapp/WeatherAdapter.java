@@ -7,8 +7,9 @@ import android.view.ViewGroup;
 
 import com.vincenttetau.weatherapp.models.Forecast;
 import com.vincenttetau.weatherapp.models.Weather;
+import com.vincenttetau.weatherapp.utils.TimeUtil;
+import com.vincenttetau.weatherapp.utils.WeatherUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherViewHolder> {
@@ -27,7 +28,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherViewHolder> {
 
     @Override
     public void onBindViewHolder(WeatherViewHolder viewHolder, int position) {
-        Forecast forecast = weatherCallback.getWeatherData().get(position);
+        Forecast forecast = weatherCallback.getForecasts().get(position);
         Weather weather = forecast.getWeatherList().get(0);
 
         viewHolder.setWeatherConditionImageResource(WeatherUtil.getWeatherConditionImageResource(weather.getId()));
@@ -38,12 +39,12 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherViewHolder> {
 
     @Override
     public int getItemCount() {
-        return weatherCallback.getWeatherData().size();
+        return weatherCallback.getForecasts().size();
     }
 
     public interface WeatherCallback {
 
-        List<Forecast> getWeatherData();
+        List<Forecast> getForecasts();
 
     }
 }

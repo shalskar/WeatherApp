@@ -5,4 +5,13 @@
     <color name="colorAccent">#FFFFFF</color>
 
     <color name="white_100pc">#FFFFFFFF</color>
+    <!--Ensure this is correct-->
+    <color name="white_70pc">#BBFFFFFF</color>
+
+    <color name="gradient_day_top">#509DDD</color>
+    <color name="gradient_day_bottom">#0579DA</color>
+
+    <color name="gradient_night_top">#044880</color>
+    <color name="gradient_night_bottom">#001B31</color>
+
 </resources>

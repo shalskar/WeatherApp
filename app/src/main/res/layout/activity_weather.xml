@@ -1,142 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container_viewgroup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@drawable/background_gradient"
+    android:focusable="true"
+    android:focusableInTouchMode="false"
     tools:context="com.vincenttetau.weatherapp.activities.WeatherActivity">
 
-    <TextView
-        android:id="@+id/temperature_textview"
-        style="@style/TextAppearance.AppCompat.Display4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="64dp"
-        android:textColor="@color/white_100pc"
-        tools:text="5C" />
-
-    <TextView
-        android:id="@+id/weather_condition_textview"
-        style="@style/TextAppearance.AppCompat.Headline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/temperature_textview"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="-16dp"
-        android:textColor="@color/white_100pc"
-        tools:text="Sunny" />
-
-    <LinearLayout
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/recyclerview"
-        android:layout_marginLeft="16dp"
-        android:orientation="vertical">
-
-        <TextView
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Min"
-            android:textColor="#BBFFFFFF" />
-
-        <TextView
-            android:id="@+id/min_temperature_textview"
-            style="@style/TextAppearance.AppCompat.Subhead"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:textColor="@color/white_100pc"
-            tools:text="13C" />
-
-        <TextView
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Max"
-            android:textColor="#BBFFFFFF" />
-
-        <TextView
-            android:id="@+id/max_temperature_textview"
-            style="@style/TextAppearance.AppCompat.Subhead"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:textColor="@color/white_100pc"
-            tools:text="13C" />
-
-        <TextView
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hum"
-            android:textColor="#BBFFFFFF" />
-
-        <TextView
-            android:id="@+id/humidity_textview"
-            style="@style/TextAppearance.AppCompat.Subhead"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:textColor="@color/white_100pc"
-            tools:text="50%" />
-
-        <TextView
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Wind"
-            android:textColor="#BBFFFFFF" />
-
-        <TextView
-            android:id="@+id/wind_direction_textview"
-            style="@style/TextAppearance.AppCompat.Subhead"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:textColor="@color/white_100pc"
-            tools:text="50%" />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/time_textview"
+    <EditText
+        android:id="@+id/location_edittext"
         style="@style/TextAppearance.AppCompat.Display1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/date_textview"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:textColor="@color/white_100pc" />
+        android:layout_margin="16dp"
+        android:background="@null"
+        android:hint="Enter a location"
+        android:imeOptions="actionDone"
+        android:inputType="textImeMultiLine"
+        android:maxLines="1"
+        android:minWidth="180dp"
+        android:textColor="@color/white_100pc"
+        android:textColorHint="@color/white_70pc"
+        tools:text="Wellington" />
 
     <TextView
-        android:id="@+id/date_textview"
-        style="@style/TextAppearance.AppCompat.Headline"
+        android:id="@+id/error_textview"
+        style="@style/TextAppearance.AppCompat.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/recyclerview"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:textColor="@color/white_100pc" />
+        android:layout_margin="16dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/white_100pc"
+        tools:text="5C" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview"
+    <ProgressBar
+        android:id="@+id/progressbar"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
+        android:layout_gravity="center"
+        android:alpha="0"/>
+
+    <RelativeLayout
+        android:id="@+id/weather_viewgroup"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/zoom_seekbar"
-        android:layout_marginTop="16dp" />
+        android:layout_height="match_parent"
+        android:alpha="0">
 
-    <SeekBar
-        android:id="@+id/zoom_seekbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"/>
+        <TextView
+            android:id="@+id/temperature_textview"
+            style="@style/TextAppearance.AppCompat.Display4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="96dp"
+            android:textColor="@color/white_100pc"
+            tools:text="5C" />
 
-</RelativeLayout>
+        <com.vincenttetau.weatherapp.FadingTextView
+            android:id="@+id/weather_condition_textview"
+            style="@style/TextAppearance.AppCompat.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/temperature_textview"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="-16dp"
+            android:textColor="@color/white_100pc"
+            tools:text="Sunny" />
+
+        <LinearLayout
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/recyclerview"
+            android:layout_marginLeft="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Min"
+                android:textColor="#BBFFFFFF" />
+
+            <TextView
+                android:id="@+id/min_temperature_textview"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/white_100pc"
+                tools:text="13C" />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Max"
+                android:textColor="#BBFFFFFF" />
+
+            <TextView
+                android:id="@+id/max_temperature_textview"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/white_100pc"
+                tools:text="13C" />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hum"
+                android:textColor="#BBFFFFFF" />
+
+            <TextView
+                android:id="@+id/humidity_textview"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/white_100pc"
+                tools:text="50%" />
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wind"
+                android:textColor="#BBFFFFFF" />
+
+            <TextView
+                android:id="@+id/wind_direction_textview"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/white_100pc"
+                tools:text="50%" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/time_textview"
+            style="@style/TextAppearance.AppCompat.Display1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/date_textview"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:textColor="@color/white_100pc" />
+
+        <TextView
+            android:id="@+id/date_textview"
+            style="@style/TextAppearance.AppCompat.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/recyclerview"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="-8dp"
+            android:textColor="@color/white_100pc" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/zoom_seekbar"
+            android:layout_marginBottom="32dp"
+            android:layout_marginTop="32dp" />
+
+        <SeekBar
+            android:id="@+id/zoom_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="32dp" />
+
+    </RelativeLayout>
+
+</FrameLayout>

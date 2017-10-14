@@ -1,36 +1,50 @@
 package com.vincenttetau.weatherapp.activities;
 
-import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.LinearSnapHelper;
-import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.vincenttetau.weatherapp.OnScrollStopListener;
+import com.vincenttetau.weatherapp.utils.ColourUtil;
+import com.vincenttetau.weatherapp.FadingTextView;
+import com.vincenttetau.weatherapp.utils.KeyboardUtil;
+import com.vincenttetau.weatherapp.OnScrollListenerAdapter;
 import com.vincenttetau.weatherapp.R;
 import com.vincenttetau.weatherapp.WeatherAdapter;
 import com.vincenttetau.weatherapp.WeatherApplication;
-import com.vincenttetau.weatherapp.WeatherUtil;
+import com.vincenttetau.weatherapp.utils.WeatherUtil;
 import com.vincenttetau.weatherapp.models.Forecast;
 import com.vincenttetau.weatherapp.models.TemperatureInfo;
 import com.vincenttetau.weatherapp.models.WindInfo;
 import com.vincenttetau.weatherapp.presenters.WeatherPresenter;
+import com.vincenttetau.weatherapp.views.WeatherView;
 
 import java.util.List;
 
+import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+import butterknife.OnEditorAction;
 
-public class WeatherActivity extends AppCompatActivity implements WeatherPresenter.WeatherView, WeatherAdapter.WeatherCallback {
+public class WeatherActivity extends BaseActivity<WeatherPresenter> implements WeatherView, WeatherAdapter.WeatherCallback {
 
-    private WeatherPresenter weatherPresenter;
+    private static final char CHAR_DEGREE = (char) 0x00B0;
+
+    private static final int FORECASTS_PER_DAY = 8;
 
     private WeatherAdapter weatherAdapter;
 
@@ -38,16 +52,31 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
 
     private SnapHelper snapHelper;
 
-    private OnScrollStopListener onScrollListener;
+    private OnScrollListenerAdapter onScrollListener;
+
+    @BindView(R.id.container_viewgroup)
+    ViewGroup containerViewGroup;
+
+    @BindView(R.id.weather_viewgroup)
+    ViewGroup weatherViewGroup;
 
     @BindView(R.id.recyclerview)
     RecyclerView recyclerView;
+
+    @BindView(R.id.error_textview)
+    TextView errorTextView;
+
+    @BindView(R.id.progressbar)
+    ProgressBar progressBar;
+
+    @BindView(R.id.location_edittext)
+    EditText locationEditText;
 
     @BindView(R.id.temperature_textview)
     TextView temperatureTextView;
 
     @BindView(R.id.weather_condition_textview)
-    TextView weatherConditionTextView;
+    FadingTextView weatherConditionTextView;
 
     @BindView(R.id.min_temperature_textview)
     TextView minTemperatureTextView;
@@ -70,6 +99,18 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
     @BindView(R.id.zoom_seekbar)
     SeekBar zoomSeekBar;
 
+    @BindColor(R.color.gradient_day_top)
+    int gradientDayTopColor;
+
+    @BindColor(R.color.gradient_day_bottom)
+    int gradientDayBottomColor;
+
+    @BindColor(R.color.gradient_night_top)
+    int gradientNightTopColor;
+
+    @BindColor(R.color.gradient_night_bottom)
+    int gradientNightBottomColor;
+
     @Override
     protected void onCreate(@NonNull Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,9 +118,9 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
 
         ButterKnife.bind(this);
 
-        initialisePresenter(savedInstanceState == null);
         initialiseRecyclerView();
         initialiseSeekBar();
+        getPresenter().bindView(this);
     }
 
     private void initialiseRecyclerView() {
@@ -87,14 +128,14 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
         layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(weatherAdapter);
-        snapHelper = new LinearSnapHelper();
-        snapHelper.attachToRecyclerView(recyclerView);
+//        snapHelper = new LinearSnapHelper();
+//        snapHelper.attachToRecyclerView(recyclerView);
 
-        onScrollListener = new OnScrollStopListener(layoutManager) {
+        onScrollListener = new OnScrollListenerAdapter(layoutManager) {
             @Override
-            public void onScrollStopped(int centreMostPosition) {
-                weatherPresenter.onPositionChanged(centreMostPosition);
-                zoomSeekBar.setProgress(centreMostPosition);
+            public void onScrolled(int centreMostPosition) {
+                getPresenter().onPositionChanged(centreMostPosition);
+                setSeekBarProgress(centreMostPosition / FORECASTS_PER_DAY);
             }
         };
 
@@ -102,25 +143,61 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
     }
 
     private void initialiseSeekBar() {
-        zoomSeekBar.setMax(getWeatherData().size());
         zoomSeekBar.setOnSeekBarChangeListener(seekBarChangeListener);
     }
 
-    private void initialisePresenter(boolean firstLoad) {
-        if (firstLoad) {
-            weatherPresenter = new WeatherPresenter(((WeatherApplication) getApplication()).getNetworkingManager());
+    @Override
+    protected WeatherPresenter createPresenter() {
+        return new WeatherPresenter(((WeatherApplication) getApplication()).getNetworkingManager());
+    }
+
+    @OnEditorAction(R.id.location_edittext)
+    boolean onLocationEntered() {
+        // todo fix virtual keyboard go not working
+        // todo check why this being called twice
+        KeyboardUtil.hideKeyboard(locationEditText);
+        getPresenter().loadWeather(locationEditText.getText().toString());
+        return true;
+    }
+
+    @Override
+    public void showWeatherView() {
+        weatherViewGroup.animate().alpha(1).start();
+    }
+
+    @Override
+    public void hideWeatherView() {
+        weatherViewGroup.animate().alpha(0).start();
+    }
+
+    @Override
+    public void setLoading(boolean loading) {
+        progressBar.animate().alpha(loading ? 1 : 0).start();
+    }
+
+    @Override
+    public void setError(@Nullable String errorMessage) {
+        errorTextView.setText(errorMessage);
+    }
+
+    @Override
+    public void setError(@StringRes int errorMessageRes) {
+        errorTextView.setText(errorMessageRes);
+    }
+
+    private void setSeekBarProgress(int position) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            zoomSeekBar.setProgress(position, true);
         } else {
-            weatherPresenter = (WeatherPresenter) getLastCustomNonConfigurationInstance();
+            zoomSeekBar.setProgress(position);
         }
-        weatherPresenter.bindView(this);
     }
 
     @Override
     public void setTemperature(@NonNull TemperatureInfo temperatureInfo) {
-        // todo clean up
-        temperatureTextView.setText(String.format("%.0f", temperatureInfo.getTemperature()) + (char) 0x00B0 + "C");
-        minTemperatureTextView.setText(String.format("%.0f", temperatureInfo.getMinTemperature()) + (char) 0x00B0 + "C");
-        maxTemperatureTextView.setText(String.format("%.0f", temperatureInfo.getMaxTemperature()) + (char) 0x00B0 + "C");
+        temperatureTextView.setText(getString(R.string.format_degree_celcius, temperatureInfo.getTemperature(), CHAR_DEGREE));
+        minTemperatureTextView.setText(getString(R.string.format_degree_celcius, temperatureInfo.getMinTemperature(), CHAR_DEGREE));
+        maxTemperatureTextView.setText(getString(R.string.format_degree_celcius, temperatureInfo.getMaxTemperature(), CHAR_DEGREE));
         humidityTextView.setText(String.format("%.0f", temperatureInfo.getHumidity()) + "%");
     }
 
@@ -130,8 +207,8 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
     }
 
     @Override
-    public void setWeatherCondition(@NonNull String weatherCondition) {
-        weatherConditionTextView.setText(weatherCondition);
+    public void setWeatherCondition(@NonNull final String weatherCondition) {
+        weatherConditionTextView.setTextAnimated(weatherCondition);
     }
 
     @Override
@@ -146,42 +223,63 @@ public class WeatherActivity extends AppCompatActivity implements WeatherPresent
 
     @Override
     public void updateList() {
+        weatherViewGroup.setVisibility(View.VISIBLE);
         weatherAdapter.notifyDataSetChanged();
         zoomSeekBar.post(new Runnable() {
             @Override
             public void run() {
-                zoomSeekBar.setMax(getWeatherData().size());
+                zoomSeekBar.setMax((getForecasts().size() - 1) / FORECASTS_PER_DAY);
             }
         });
     }
 
     @Override
-    public List<Forecast> getWeatherData() {
-        return weatherPresenter.getWeatherData();
+    public void updateBackground(int hours) {
+        if (getForecasts().isEmpty()) {
+            return;
+        }
+
+        GradientDrawable gradientDrawable = (GradientDrawable) getResources().getDrawable(R.drawable.background_gradient);
+        float ratio;
+
+        if (hours <= 12) {
+            ratio = hours / 12f;
+        } else {
+            ratio = (12 - (hours - 12)) / 12f;
+        }
+
+        AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
+        ratio = interpolator.getInterpolation(ratio);
+
+        int topColour = ColourUtil.mixColours(gradientDayTopColor, gradientNightTopColor, ratio);
+        int bottomColour = ColourUtil.mixColours(gradientDayBottomColor, gradientNightBottomColor, ratio);
+
+        gradientDrawable.setColors(new int[]{bottomColour, topColour});
+
+        Drawable currentBackground = containerViewGroup.getBackground();
+
+        if (currentBackground instanceof TransitionDrawable) {
+            currentBackground = ((TransitionDrawable) currentBackground).getDrawable(1);
+        }
+
+        TransitionDrawable transitionDrawable = new TransitionDrawable(new Drawable[]{currentBackground, gradientDrawable});
+        transitionDrawable.startTransition(100);
+
+        containerViewGroup.setBackground(transitionDrawable);
     }
 
     @Override
-    public Object onRetainCustomNonConfigurationInstance() {
-        return weatherPresenter;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        weatherPresenter.unbindView();
-    }
-
-    @Override
-    protected void attachBaseContext(@NonNull Context context) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(context));
+    public List<Forecast> getForecasts() {
+        return getPresenter().getForecasts();
     }
 
     private SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int position, boolean fromUser) {
+            int actualPosition = position * FORECASTS_PER_DAY;
             if (fromUser) {
-                weatherPresenter.onPositionChanged(position);
-                recyclerView.smoothScrollToPosition(position);
+                getPresenter().onPositionChanged(actualPosition);
+                recyclerView.smoothScrollToPosition(actualPosition);
             }
         }
 
