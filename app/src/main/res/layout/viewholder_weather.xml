@@ -3,26 +3,25 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/time_textview"
-        style="@style/TextAppearance.AppCompat.Subhead"
+        style="@style/TextAppearance.AppCompat.Body1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="4dp"
-        android:textColor="#BBFFFFFF" />
+        android:textColor="@color/white_70pc" />
 
     <ImageView
         android:id="@+id/weather_condition_imageview"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/weather_icon_size"
+        android:layout_height="@dimen/weather_icon_size"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_sun"
-        android:alpha="0.6"
-        android:tint="@color/white_100pc" />
+        android:tint="@color/white_70pc" />
 
 </LinearLayout>

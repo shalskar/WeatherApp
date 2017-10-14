@@ -7,8 +7,6 @@ import com.vincenttetau.weatherapp.R;
 
 public class WeatherUtil {
 
-    public static final String NO_FLOATING_POINT_NUMBER_FORMAT = "%0.f";
-
     @StringRes
     public static int getWindDirectionStringResource(float windDirection) {
         if (windDirection >= 337.5f || windDirection < 22.5f) {
@@ -50,10 +48,9 @@ public class WeatherUtil {
             return  R.drawable.ic_light_clouds;
         } else if (weatherConditionId >= 802 && weatherConditionId <= 804) {
             return  R.drawable.ic_cloudy;
-        } else {
-            // TODO remove
-            return R.drawable.ic_temperature;
         }
+
+        return -1;
     }
 
 }

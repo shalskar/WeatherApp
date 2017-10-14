@@ -1,11 +1,10 @@
 package com.vincenttetau.weatherapp.networking;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.vincenttetau.weatherapp.UnixTimeAdapter;
+import com.vincenttetau.weatherapp.utils.UnixTimeAdapter;
 
 import java.io.IOException;
 import java.util.Date;
@@ -28,20 +27,14 @@ public class NetworkingManager {
     private static final String UNIT_KEY = "units";
     private static final String UNIT_VALUE = "metric";
 
-    private Context context;
-
-    private Retrofit retrofit;
-
     private WeatherApi weatherApi;
 
-    public NetworkingManager(Context context) {
-        this.context = context;
-
+    public NetworkingManager() {
         initialiseRetrofit();
     }
 
     private void initialiseRetrofit() {
-        retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_WEATHER_API_URL)
                 .client(createHttpClient())
                 .addConverterFactory(GsonConverterFactory.create(createCustomGson()))
@@ -82,7 +75,6 @@ public class NetworkingManager {
         return httpClientBuilder.build();
     }
 
-    // TODO possibly make the networking manager cache results
     public WeatherApi getWeatherApi() {
         return weatherApi;
     }

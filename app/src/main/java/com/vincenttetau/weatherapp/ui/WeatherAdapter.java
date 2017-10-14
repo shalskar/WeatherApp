@@ -1,10 +1,11 @@
-package com.vincenttetau.weatherapp;
+package com.vincenttetau.weatherapp.ui;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.vincenttetau.weatherapp.R;
 import com.vincenttetau.weatherapp.models.Forecast;
 import com.vincenttetau.weatherapp.models.Weather;
 import com.vincenttetau.weatherapp.utils.TimeUtil;
@@ -33,8 +34,6 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherViewHolder> {
 
         viewHolder.setWeatherConditionImageResource(WeatherUtil.getWeatherConditionImageResource(weather.getId()));
         viewHolder.setTimeText(TimeUtil.formatTime(forecast.getDate()));
-        viewHolder.setConditionText(weather.getDescription());
-        viewHolder.setWindDirectionText(WeatherUtil.getWindDirectionStringResource(forecast.getWindInfo().getDegree()));
     }
 
     @Override

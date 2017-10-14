@@ -42,6 +42,10 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     protected void onDestroy() {
         super.onDestroy();
         presenter.unbindView();
+
+        if (!isChangingConfigurations()) {
+            presenter.onDestroy();
+        }
     }
 
     @Override

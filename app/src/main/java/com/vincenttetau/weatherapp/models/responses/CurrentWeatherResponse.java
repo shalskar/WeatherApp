@@ -14,45 +14,4 @@ public class CurrentWeatherResponse extends Forecast {
         super(date, temperatureInfo, weatherList, windInfo);
     }
 
-//    @SerializedName("coord")
-//    private Coordinate coordinate;
-//
-//    @SerializedName("weather")
-//    private List<Weather> weatherList;
-//
-//    private TemperatureInfo main;
-//
-//    public CurrentWeatherResponse(@NonNull String code, float message, Coordinate coordinate, List<Weather> weatherList, TemperatureInfo main) {
-//        super(code, message);
-//        this.coordinate = coordinate;
-//        this.weatherList = weatherList;
-//        this.main = main;
-//    }
-//
-//    public Coordinate getCoordinate() {
-//        return coordinate;
-//    }
-//
-//    public void setCoordinate(Coordinate coordinate) {
-//        this.coordinate = coordinate;
-//    }
-//
-//    public List<Weather> getWeatherList() {
-//        return weatherList;
-//    }
-//
-//    public void setWeatherList(List<Weather> weatherList) {
-//        this.weatherList = weatherList;
-//    }
-//
-//    public TemperatureInfo getTemperatureInfo() {
-//        return main;
-//    }
-//
-//    public void setTemperatureInfo(TemperatureInfo main) {
-//        this.main = main;
-//    }
-
-    // Todo continue fields
-
 }

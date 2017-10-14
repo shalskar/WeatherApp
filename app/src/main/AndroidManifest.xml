@@ -15,7 +15,7 @@
 
         <activity
             android:name=".activities.WeatherActivity"
-            android:windowSoftInputMode="stateVisible|adjustPan">
+            android:windowSoftInputMode="stateUnchanged|adjustPan">
 
             <intent-filter>
 

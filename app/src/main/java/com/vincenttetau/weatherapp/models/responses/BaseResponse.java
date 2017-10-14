@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class BaseResponse {
 
-    // todo possibly don't need to check error codes
     private static final String SUCCESSFUL = "200";
 
     @SerializedName("cod")

@@ -16,7 +16,7 @@ public class WeatherApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        this.networkingManager = new NetworkingManager(this);
+        this.networkingManager = new NetworkingManager();
 
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                 .setDefaultFontPath(DEFAULT_FONT_PATH)

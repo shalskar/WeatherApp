@@ -1,4 +1,4 @@
-package com.vincenttetau.weatherapp;
+package com.vincenttetau.weatherapp.ui;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,7 +28,7 @@ public abstract class OnScrollListenerAdapter extends RecyclerView.OnScrollListe
         }
     }
 
-    private int findCentreMostPosition() {
+    public int findCentreMostPosition() {
         int firstPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
         int lastPosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
         int diff = lastPosition - firstPosition;

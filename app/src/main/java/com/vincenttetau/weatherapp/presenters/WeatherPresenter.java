@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.vincenttetau.weatherapp.R;
+import com.vincenttetau.weatherapp.utils.StringUtil;
 import com.vincenttetau.weatherapp.utils.TimeUtil;
 import com.vincenttetau.weatherapp.models.Forecast;
 import com.vincenttetau.weatherapp.models.Weather;
@@ -120,7 +121,6 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
 
                     @Override
                     public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-                        // todo make errors persist on rotation
                         getView().setError(R.string.generic_error_message);
                         getView().setLoading(false);
                         weatherDisposable = null;
@@ -156,11 +156,8 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
             getView().setDate(TimeUtil.formatDate(forecast.getDate()));
             getView().setTime(TimeUtil.formatTime(forecast.getDate()));
 
-            // todo move to util
             Weather weather = forecast.getWeatherList().get(0);
-            String weatherCondition = weather.getDescription();
-            weatherCondition = weatherCondition.substring(0, 1).toUpperCase() + weatherCondition.substring(1);
-
+            String weatherCondition = StringUtil.capitiliseFirstCharacter(weather.getDescription());
             getView().setWeatherCondition(weatherCondition);
 
             getView().updateBackground(getHourOfDay(forecast));
@@ -171,6 +168,11 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(forecast.getDate());
         return calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
+    @Override
+    public void onDestroy() {
+        weatherDisposable.dispose();
     }
 
     public List<Forecast> getForecasts() {

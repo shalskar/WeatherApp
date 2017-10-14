@@ -12,5 +12,10 @@
     <string name="format_degree_celcius">%1$.0f%2$sC</string>
 
     <string name="generic_error_message">We were unable to find any weather data, please try again later.</string>
+    <string name="enter_a_location">Enter a location</string>
+    <string name="min">Min</string>
+    <string name="max">Max</string>
+    <string name="hum">Hum</string>
+    <string name="wind">Wind</string>
 
 </resources>

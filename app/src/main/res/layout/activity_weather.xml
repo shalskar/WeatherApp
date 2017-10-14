@@ -7,6 +7,7 @@
     android:background="@drawable/background_gradient"
     android:focusable="true"
     android:focusableInTouchMode="false"
+    android:descendantFocusability="beforeDescendants"
     tools:context="com.vincenttetau.weatherapp.activities.WeatherActivity">
 
     <EditText
@@ -16,11 +17,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:background="@null"
-        android:hint="Enter a location"
-        android:imeOptions="actionDone"
+        android:hint="@string/enter_a_location"
+        android:imeOptions="actionGo"
         android:inputType="textImeMultiLine"
         android:maxLines="1"
-        android:minWidth="180dp"
+        android:minWidth="@dimen/location_edittext_min_width"
         android:textColor="@color/white_100pc"
         android:textColorHint="@color/white_70pc"
         tools:text="Wellington" />
@@ -30,8 +31,8 @@
         style="@style/TextAppearance.AppCompat.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:layout_gravity="center"
+        android:layout_margin="16dp"
         android:gravity="center"
         android:textColor="@color/white_100pc"
         tools:text="5C" />
@@ -39,16 +40,17 @@
     <ProgressBar
         android:id="@+id/progressbar"
         style="@style/Widget.AppCompat.ProgressBar"
-        android:layout_width="92dp"
-        android:layout_height="92dp"
+        android:layout_width="@dimen/progressbar_size"
+        android:layout_height="@dimen/progressbar_size"
         android:layout_gravity="center"
-        android:alpha="0"/>
+        android:alpha="0" />
 
     <RelativeLayout
         android:id="@+id/weather_viewgroup"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0">
+        android:alpha="0"
+        tools:alpha="1">
 
         <TextView
             android:id="@+id/temperature_textview"
@@ -56,11 +58,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="96dp"
+            android:layout_marginTop="@dimen/temperature_textview_top_margin"
             android:textColor="@color/white_100pc"
             tools:text="5C" />
 
-        <com.vincenttetau.weatherapp.FadingTextView
+        <com.vincenttetau.weatherapp.ui.FadingTextView
             android:id="@+id/weather_condition_textview"
             style="@style/TextAppearance.AppCompat.Headline"
             android:layout_width="wrap_content"
@@ -73,18 +75,20 @@
             tools:text="Sunny" />
 
         <LinearLayout
-            android:layout_width="160dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/recyclerview"
+            android:layout_marginBottom="@dimen/carousel_margin"
             android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:orientation="vertical">
 
             <TextView
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Min"
-                android:textColor="#BBFFFFFF" />
+                android:text="@string/min"
+                android:textColor="@color/white_70pc" />
 
             <TextView
                 android:id="@+id/min_temperature_textview"
@@ -99,8 +103,8 @@
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Max"
-                android:textColor="#BBFFFFFF" />
+                android:text="@string/max"
+                android:textColor="@color/white_70pc" />
 
             <TextView
                 android:id="@+id/max_temperature_textview"
@@ -115,8 +119,8 @@
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hum"
-                android:textColor="#BBFFFFFF" />
+                android:text="@string/hum"
+                android:textColor="@color/white_70pc" />
 
             <TextView
                 android:id="@+id/humidity_textview"
@@ -131,8 +135,8 @@
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Wind"
-                android:textColor="#BBFFFFFF" />
+                android:text="@string/wind"
+                android:textColor="@color/white_70pc" />
 
             <TextView
                 android:id="@+id/wind_direction_textview"
@@ -141,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:textColor="@color/white_100pc"
-                tools:text="50%" />
+                tools:text="NE" />
 
         </LinearLayout>
 
@@ -155,6 +159,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
+            android:gravity="end"
             android:textColor="@color/white_100pc" />
 
         <TextView
@@ -165,21 +170,22 @@
             android:layout_above="@+id/recyclerview"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/carousel_margin"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginTop="-8dp"
+            android:gravity="end"
             android:textColor="@color/white_100pc" />
+
+        <View
+            android:layout_width="16dp"
+            android:layout_height="2dp"
+            android:layout_above="@+id/recyclerview"
+            android:layout_centerHorizontal="true"
+            android:background="@color/white_70pc" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/zoom_seekbar"
-            android:layout_marginBottom="32dp"
-            android:layout_marginTop="32dp" />
-
-        <SeekBar
-            android:id="@+id/zoom_seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

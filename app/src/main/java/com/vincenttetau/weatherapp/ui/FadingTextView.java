@@ -1,4 +1,4 @@
-package com.vincenttetau.weatherapp;
+package com.vincenttetau.weatherapp.ui;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 
 public class FadingTextView extends android.support.v7.widget.AppCompatTextView {
 
-    // todo cleanup
     private boolean fadingIn;
 
     @Nullable
@@ -28,23 +27,25 @@ public class FadingTextView extends android.support.v7.widget.AppCompatTextView 
 
             if (!fadingIn) {
                 fadingIn = true;
-                animate()
-                        .alpha(0)
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                fadingIn = false;
-                                setText(latestText);
-                                fadeOut();
-                            }
-                        }).start();
+                fadeOut();
             }
         }
     }
 
     private void fadeOut() {
-        animate()
-                .alpha(1)
+        animate().alpha(0)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        fadingIn = false;
+                        setText(latestText);
+                        fadeIn();
+                    }
+                }).start();
+    }
+
+    private void fadeIn() {
+        animate().alpha(1)
                 .start();
     }
 }
