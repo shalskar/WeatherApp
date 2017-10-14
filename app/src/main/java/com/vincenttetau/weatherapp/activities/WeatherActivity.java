@@ -1,6 +1,7 @@
 package com.vincenttetau.weatherapp.activities;
 
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -103,6 +104,10 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
     protected void onCreate(@NonNull Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, android.R.color.black));
+        }
 
         ButterKnife.bind(this);
 
@@ -207,7 +212,7 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
 
         float ratio = calculateGradientRatio(hourOfDay);
 
-        int topColour = ColourUtil.mixColours(gradientDayTopColor, gradientNightTopColor, ratio);
+        final int topColour = ColourUtil.mixColours(gradientDayTopColor, gradientNightTopColor, ratio);
         int bottomColour = ColourUtil.mixColours(gradientDayBottomColor, gradientNightBottomColor, ratio);
 
         gradientDrawable.setColors(new int[]{bottomColour, topColour});
