@@ -15,4 +15,10 @@ public interface WeatherApi {
     @GET("forecast")
     Observable<ForecastResponse> getForecast(@Query("q") String city);
 
+    @GET("weather")
+    Observable<CurrentWeatherResponse> getCurrentWeather(@Query("id") long cityId);
+
+    @GET("forecast")
+    Observable<ForecastResponse> getForecast(@Query("id") long cityId);
+
 }

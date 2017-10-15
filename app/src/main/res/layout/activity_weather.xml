@@ -19,7 +19,7 @@
         android:background="@null"
         android:hint="@string/enter_a_location"
         android:imeOptions="actionGo"
-        android:inputType="textImeMultiLine"
+        android:inputType="textImeMultiLine|textNoSuggestions"
         android:maxLines="1"
         android:minWidth="@dimen/location_edittext_min_width"
         android:textColor="@color/white_100pc"

@@ -3,7 +3,11 @@ package com.vincenttetau.weatherapp.presenters;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.vincenttetau.weatherapp.R;
+import com.vincenttetau.weatherapp.models.Location;
+import com.vincenttetau.weatherapp.networking.WeatherApi;
 import com.vincenttetau.weatherapp.utils.StringUtil;
 import com.vincenttetau.weatherapp.utils.TimeUtil;
 import com.vincenttetau.weatherapp.models.Forecast;
@@ -13,10 +17,12 @@ import com.vincenttetau.weatherapp.models.responses.ForecastResponse;
 import com.vincenttetau.weatherapp.networking.NetworkingManager;
 import com.vincenttetau.weatherapp.views.WeatherView;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -28,6 +34,8 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
 
     private Disposable weatherDisposable;
 
+    private List<Location> locations;
+
     private List<Forecast> forecasts;
 
     @Nullable
@@ -38,9 +46,14 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
         this.forecasts = new ArrayList<>();
     }
 
+    public void initialiseLocations(@NonNull String locationsJson) {
+        Gson gson = new Gson();
+        Type listType = new TypeToken<ArrayList<Location>>() {}.getType();
+        locations = gson.fromJson(locationsJson, listType);
+    }
+
     public void bindView(@NonNull WeatherView weatherView) {
         super.bindView(weatherView);
-        // todo automatically load from users gps
         restoreState();
     }
 
@@ -56,7 +69,18 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
         getView().setError(currentError);
     }
 
-    public void loadWeather(@NonNull final String cityId) {
+    private void loadWeather(final long cityId) {
+        WeatherApi weatherApi = networkingManager.getWeatherApi();
+        loadWeather(weatherApi.getCurrentWeather(cityId), weatherApi.getForecast(cityId));
+    }
+
+    public void loadWeather(@NonNull final String city) {
+        WeatherApi weatherApi = networkingManager.getWeatherApi();
+        loadWeather(weatherApi.getCurrentWeather(city), weatherApi.getForecast(city));
+    }
+
+    private void loadWeather(@NonNull Observable<CurrentWeatherResponse> currentWeatherObservable,
+                            @NonNull final Observable<ForecastResponse> forecastObservable) {
         getView().hideWeatherView();
         getView().setLoading(true);
         currentError = null;
@@ -69,8 +93,7 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
 
         forecasts.clear();
 
-        networkingManager.getWeatherApi()
-                .getCurrentWeather(cityId)
+        currentWeatherObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<CurrentWeatherResponse>() {
@@ -81,7 +104,7 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
 
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull CurrentWeatherResponse currentWeatherResponse) {
-                        handleWeatherLoadedSuccess(currentWeatherResponse, cityId);
+                        handleWeatherLoadedSuccess(currentWeatherResponse, forecastObservable);
                     }
 
                     @Override
@@ -98,14 +121,14 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
                 });
     }
 
-    private void handleWeatherLoadedSuccess(@NonNull CurrentWeatherResponse currentWeatherResponse, @NonNull String cityId) {
+    private void handleWeatherLoadedSuccess(@NonNull CurrentWeatherResponse currentWeatherResponse,
+                                            @NonNull Observable<ForecastResponse> forecastObservable) {
         forecasts.add(currentWeatherResponse);
-        loadForecast(cityId);
+        loadForecast(forecastObservable);
     }
 
-    private void loadForecast(@NonNull String cityId) {
-        networkingManager.getWeatherApi()
-                .getForecast(cityId)
+    private void loadForecast(@NonNull Observable<ForecastResponse> forecastObservable) {
+        forecastObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ForecastResponse>() {
@@ -148,6 +171,18 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
         getView().setLoading(false);
     }
 
+    public void onLocationTextChanged(@Nullable String location) {
+        if (location != null && location.length() >= 2) {
+            getView().showLocationSuggestions(location);
+        } else {
+            getView().hideLocationSuggestions();
+        }
+    }
+
+    public void onLocationSuggestionClicked(@NonNull Location location) {
+        loadWeather(location.getId());
+    }
+
     public void onPositionChanged(int position) {
         if (!forecasts.isEmpty()) {
             Forecast forecast = forecasts.get(position);
@@ -181,4 +216,7 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
         return forecasts;
     }
 
+    public List<Location> getLocations() {
+        return locations;
+    }
 }

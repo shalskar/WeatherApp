@@ -9,17 +9,22 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSnapHelper;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.vincenttetau.weatherapp.models.Location;
 import com.vincenttetau.weatherapp.ui.BufferItemDecoration;
+import com.vincenttetau.weatherapp.ui.LocationSuggestionsAdapter;
 import com.vincenttetau.weatherapp.utils.ColourUtil;
 import com.vincenttetau.weatherapp.ui.FadingTextView;
+import com.vincenttetau.weatherapp.utils.FileUtil;
 import com.vincenttetau.weatherapp.utils.KeyboardUtil;
 import com.vincenttetau.weatherapp.ui.OnScrollListenerAdapter;
 import com.vincenttetau.weatherapp.R;
@@ -33,18 +38,26 @@ import com.vincenttetau.weatherapp.models.WindInfo;
 import com.vincenttetau.weatherapp.presenters.WeatherPresenter;
 import com.vincenttetau.weatherapp.views.WeatherView;
 
+import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnEditorAction;
+import butterknife.OnTextChanged;
 
 public class WeatherActivity extends BaseActivity<WeatherPresenter> implements WeatherView, WeatherAdapter.WeatherCallback {
 
     private static final char CHAR_DEGREE = (char) 0x00B0;
 
     private WeatherAdapter weatherAdapter;
+
+    private ListPopupWindow locationSuggestionsPopUpWindow;
+
+    private LocationSuggestionsAdapter locationSuggestionsArrayAdapter;
+
+    private boolean isLocationInputActive;
 
     @BindView(R.id.container_viewgroup)
     ViewGroup containerViewGroup;
@@ -101,7 +114,7 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
     int gradientNightBottomColor;
 
     @Override
-    protected void onCreate(@NonNull Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
@@ -112,7 +125,33 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
         ButterKnife.bind(this);
 
         initialiseRecyclerView();
+        initialiseLocations();
+        initialiseSuggestionsPopUpWindow();
         getPresenter().bindView(this);
+
+        // This is to prevent onTextChanged() events when restoring the activity
+        isLocationInputActive = savedInstanceState == null;
+    }
+
+    private void initialiseLocations() {
+        try {
+            getPresenter().initialiseLocations(FileUtil.openRawResource(this, R.raw.locations));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initialiseSuggestionsPopUpWindow() {
+        locationSuggestionsArrayAdapter = new LocationSuggestionsAdapter(this, getPresenter().getLocations());
+        locationSuggestionsPopUpWindow = new ListPopupWindow(this);
+        locationSuggestionsPopUpWindow.setAdapter(locationSuggestionsArrayAdapter);
+        locationSuggestionsPopUpWindow.setAnchorView(locationEditText);
+        locationSuggestionsPopUpWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onLocationSuggestionClicked(locationSuggestionsArrayAdapter.getItem(position));
+            }
+        });
     }
 
     private void initialiseRecyclerView() {
@@ -133,18 +172,47 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
         });
     }
 
+    private void onLocationSuggestionClicked(@NonNull Location location) {
+        isLocationInputActive = false;
+        locationEditText.setText(location.getName());
+        isLocationInputActive = true;
+        KeyboardUtil.hideKeyboard(locationEditText);
+        locationEditText.clearFocus();
+        locationSuggestionsPopUpWindow.dismiss();
+
+        getPresenter().onLocationSuggestionClicked(location);
+    }
+
     @Override
     protected WeatherPresenter createPresenter() {
         return new WeatherPresenter(((WeatherApplication) getApplication()).getNetworkingManager());
     }
 
+    @OnTextChanged(R.id.location_edittext)
+    void onLocationChanged() {
+        if (!isLocationInputActive) return;
+        getPresenter().onLocationTextChanged(locationEditText.getText().toString());
+    }
+
     @OnEditorAction(R.id.location_edittext)
     boolean onLocationEntered() {
         KeyboardUtil.hideKeyboard(locationEditText);
+        hideLocationSuggestions();
         locationEditText.clearFocus();
         containerViewGroup.findFocus();
         getPresenter().loadWeather(locationEditText.getText().toString());
         return true;
+    }
+
+    @Override
+    public void showLocationSuggestions(@NonNull String filterText) {
+        locationSuggestionsArrayAdapter.getFilter().filter(filterText);
+        locationSuggestionsPopUpWindow.show();
+    }
+
+    @Override
+    public void hideLocationSuggestions() {
+        locationSuggestionsPopUpWindow.dismiss();
     }
 
     @Override
@@ -236,4 +304,16 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
         return getPresenter().getForecasts();
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        isLocationInputActive = true;
+    }
+
+    @Override
+    protected void onPause() {
+        locationSuggestionsPopUpWindow.dismiss();
+        locationSuggestionsPopUpWindow = null;
+        super.onPause();
+    }
 }

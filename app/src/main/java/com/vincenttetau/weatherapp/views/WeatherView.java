@@ -9,6 +9,10 @@ import com.vincenttetau.weatherapp.models.WindInfo;
 
 public interface WeatherView extends BaseView {
 
+    void showLocationSuggestions(@NonNull String filterText);
+
+    void hideLocationSuggestions();
+
     void showWeatherView();
 
     void hideWeatherView();
