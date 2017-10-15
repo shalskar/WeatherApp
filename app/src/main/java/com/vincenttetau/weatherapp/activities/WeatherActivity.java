@@ -313,7 +313,6 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
     @Override
     protected void onPause() {
         locationSuggestionsPopUpWindow.dismiss();
-        locationSuggestionsPopUpWindow = null;
         super.onPause();
     }
 }
