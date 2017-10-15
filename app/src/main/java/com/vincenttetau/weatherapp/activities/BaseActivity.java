@@ -16,14 +16,13 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialisePresenter(savedInstanceState == null);
+        initialisePresenter();
     }
 
-    private void initialisePresenter(boolean firstLoad) {
-        if (firstLoad) {
+    private void initialisePresenter() {
+        presenter = (P) getLastCustomNonConfigurationInstance();
+        if (presenter == null) {
             presenter = createPresenter();
-        } else {
-            presenter = (P) getLastCustomNonConfigurationInstance();
         }
     }
 

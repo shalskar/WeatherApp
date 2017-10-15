@@ -121,7 +121,7 @@ public class WeatherActivity extends BaseActivity<WeatherPresenter> implements W
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(weatherAdapter);
-        recyclerView.addItemDecoration(new BufferItemDecoration());
+        recyclerView.addItemDecoration(new BufferItemDecoration((int) getResources().getDimension(R.dimen.weather_viewholder_width) / 2));
 
         new LinearSnapHelper().attachToRecyclerView(recyclerView);
 

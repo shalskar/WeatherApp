@@ -172,7 +172,9 @@ public class WeatherPresenter extends BasePresenter<WeatherView> {
 
     @Override
     public void onDestroy() {
-        weatherDisposable.dispose();
+        if (weatherDisposable != null) {
+            weatherDisposable.dispose();
+        }
     }
 
     public List<Forecast> getForecasts() {

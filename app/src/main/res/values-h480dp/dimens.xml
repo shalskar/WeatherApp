@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="temperature_textview_top_margin">96dp</dimen>
+    <dimen name="carousel_margin">32dp</dimen>
+
+</resources>
